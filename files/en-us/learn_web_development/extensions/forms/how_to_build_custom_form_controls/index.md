@@ -1678,11 +1678,11 @@ To support these roles, we update our HTML like this:
 
 ### The `aria-selected` attribute
 
-Using the [`role`](/en-US/docs/Web/Accessibility/ARIA/Guides/Techniques) attribute is not enough. [ARIA](/en-US/docs/Web/Accessibility/ARIA) also provides many states and property attributes. The more and better you use them, the better your control will be understood by assistive technologies.
+Using the [`role`](/en-US/docs/Web/Accessibility/ARIA/Guides/Techniques) attribute is not enough. [ARIA](/en-US/docs/Web/Accessibility/ARIA) also provides states and properties that let assistive technologies track which option is selected and which option is currently active.
 
 The `aria-selected` attribute is used to mark which option is currently selected; this lets assistive technologies inform the user what the current selection is. Each option also has a unique `id` so that the [`aria-activedescendant`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-activedescendant) attribute on the combobox container can point to the currently active option. We update this dynamically with JavaScript every time the user selects or navigates to a different option.
 
-We use `updateValue()` dynamically with JavaScript to mark the selected option and update the active descendant each time the user chooses one:
+The `updateValue()` function marks the selected option and updates the active descendant each time the user chooses one:
 
 ```js
 function updateValue(select, index) {
@@ -1724,13 +1724,19 @@ function toggleOptList(select) {
 function deactivateSelect(select) {
   if (!select.classList.contains("active")) return;
 
-  const optList = select.querySelector(".optList");
+  const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
 
-  optList.classList.add("hidden");
+  if (selectedOption) {
+    highlightOption(select, selectedOption);
+  }
+
   select.classList.remove("active");
+  select.querySelector(".optList").classList.add("hidden");
   select.setAttribute("aria-expanded", "false");
 }
 ```
+
+In the complete version of the code shown below, `highlightOption()` also updates `aria-activedescendant`. Calling it before hiding the list keeps the visual highlight and active descendant aligned with the selected option.
 
 ### Keyboard interaction
 
@@ -1792,7 +1798,7 @@ select.addEventListener("keydown", (event) => {
 
 ### Focus and click handling
 
-Proper focus management ensures that the option list opens and closes predictably. When the custom control receives focus, we deactivate any other open selects. On blur, we close the list.
+When the custom control receives focus, we deactivate any other open selects. On blur, we close the list.
 
 For mouse interaction, we attach a `mousedown` handler on each option that calls `event.preventDefault()` to prevent the click from triggering a `blur` event on the container. The `click` handler on each option calls `event.stopPropagation()` to prevent the container's own click handler from toggling the list again, then updates the value, closes the list, and returns focus to the control:
 
@@ -1998,6 +2004,8 @@ Check out the [full source code here](/en-US/docs/Learn_web_development/Extensio
 // -------------------- //
 
 function deactivateSelect(select) {
+  if (!select.classList.contains("active")) return;
+
   const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
 
   if (selectedOption) {

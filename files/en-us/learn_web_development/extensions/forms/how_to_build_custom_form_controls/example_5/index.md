@@ -196,6 +196,8 @@ This is the last example that explains [how to build custom form widgets](/en-US
 // -------------------- //
 
 function deactivateSelect(select) {
+  if (!select.classList.contains("active")) return;
+
   const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
 
   if (selectedOption) {
