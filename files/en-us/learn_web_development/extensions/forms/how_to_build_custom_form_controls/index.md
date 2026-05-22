@@ -1637,7 +1637,7 @@ In our example, the outer `<div>` container uses [`role="combobox"`](/en-US/docs
 
 The `<ul>` element uses [`role="listbox"`](/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/listbox_role), which tells assistive technologies that the element presents a list of selectable items. Each `<li>` element uses [`role="option"`](/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/option_role).
 
-Both the native `<select>` and the custom `<div>` receive an [`aria-label="Fruit"`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-label) attribute so that assistive technologies can announce a meaningful name for the control. The native `<select>` keeps its `aria-label` as a no-JavaScript fallback. When JavaScript enables the custom widget, the native `<select>` is removed from the tab order and accessibility tree using `tabIndex = -1` and `aria-hidden="true"`, leaving the custom combobox as the exposed accessible control.
+Both the native `<select>` and the custom `<div>` receive an [`aria-label="Fruit"`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-label) attribute so that assistive technologies can announce a meaningful name for the control. The native `<select>` keeps its `aria-label` as a no-JavaScript fallback. The custom combobox starts with `aria-hidden="true"` to hide it from assistive technologies before JavaScript enhancement. When JavaScript enables the custom widget, the native `<select>` is removed from the tab order and accessibility tree using `tabIndex = -1` and `aria-hidden="true"`, and the custom combobox's `aria-hidden` attribute is removed, exposing it as the accessible control.
 
 To support these roles, we update our HTML like this:
 
@@ -1654,7 +1654,8 @@ To support these roles, we update our HTML like this:
     aria-label="Fruit"
     aria-haspopup="listbox"
     aria-expanded="false"
-    aria-controls="fruit-options">
+    aria-controls="fruit-options"
+    aria-hidden="true">
     <span class="value">Cherry</span>
     <ul class="optList hidden" id="fruit-options" role="listbox">
       <li class="option" id="fruit-option-0" role="option" aria-selected="true">
@@ -1851,7 +1852,8 @@ Check out the [full source code here](/en-US/docs/Learn_web_development/Extensio
     aria-label="Fruit"
     aria-haspopup="listbox"
     aria-expanded="false"
-    aria-controls="fruit-options">
+    aria-controls="fruit-options"
+    aria-hidden="true">
     <span class="value">Cherry</span>
     <ul class="optList hidden" id="fruit-options" role="listbox">
       <li class="option" id="fruit-option-0" role="option" aria-selected="true">
@@ -2094,6 +2096,7 @@ selectList.forEach((select) => {
   const selectedIndex = getIndex(select);
 
   select.tabIndex = 0;
+  select.removeAttribute("aria-hidden");
   nativeWidget.tabIndex = -1;
   nativeWidget.setAttribute("aria-hidden", "true");
 

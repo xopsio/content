@@ -27,7 +27,8 @@ This is the last example that explains [how to build custom form widgets](/en-US
     aria-label="Fruit"
     aria-haspopup="listbox"
     aria-expanded="false"
-    aria-controls="fruit-options">
+    aria-controls="fruit-options"
+    aria-hidden="true">
     <span class="value">Cherry</span>
     <ul class="optList hidden" id="fruit-options" role="listbox">
       <li class="option" id="fruit-option-0" role="option" aria-selected="true">
@@ -282,6 +283,7 @@ selectList.forEach((select) => {
   const selectedIndex = getIndex(select);
 
   select.tabIndex = 0;
+  select.removeAttribute("aria-hidden");
   nativeWidget.tabIndex = -1;
   nativeWidget.setAttribute("aria-hidden", "true");
 
