@@ -1716,9 +1716,13 @@ function toggleOptList(select) {
   const optList = select.querySelector(".optList");
   const willOpen = optList.classList.contains("hidden");
 
-  optList.classList.toggle("hidden");
-  select.classList.toggle("active", willOpen);
-  select.setAttribute("aria-expanded", String(willOpen));
+  if (willOpen) {
+    optList.classList.remove("hidden");
+    select.classList.add("active");
+    select.setAttribute("aria-expanded", "true");
+  } else {
+    deactivateSelect(select);
+  }
 }
 
 function deactivateSelect(select) {
@@ -2029,9 +2033,13 @@ function toggleOptList(select) {
   const optList = select.querySelector(".optList");
   const willOpen = optList.classList.contains("hidden");
 
-  optList.classList.toggle("hidden");
-  select.classList.toggle("active", willOpen);
-  select.setAttribute("aria-expanded", String(willOpen));
+  if (willOpen) {
+    optList.classList.remove("hidden");
+    select.classList.add("active");
+    select.setAttribute("aria-expanded", "true");
+  } else {
+    deactivateSelect(select);
+  }
 }
 
 function highlightOption(select, option) {
