@@ -1741,11 +1741,9 @@ function deactivateSelect(select) {
 }
 ```
 
-In the complete version of the code shown below, `highlightOption()` also updates `aria-activedescendant`. Calling it before hiding the list keeps the visual highlight and active descendant aligned with the selected option.
-
 ### Keyboard interaction
 
-To support keyboard accessibility, the control must be operable via keyboard. We listen for `keydown` events and use a `switch` statement to handle the following keys:
+We listen for `keydown` events and handle the following keys with a `switch` statement:
 
 - <kbd>ArrowDown</kbd> — move to the next option
 - <kbd>ArrowUp</kbd> — move to the previous option
