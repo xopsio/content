@@ -2081,7 +2081,7 @@ function getIndex(select) {
 // Event binding //
 // ------------- //
 
-const form = document.querySelector(".no-widget");
+const form = document.querySelector("form");
 
 form.classList.remove("no-widget");
 form.classList.add("widget");
