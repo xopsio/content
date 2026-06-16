@@ -1718,9 +1718,12 @@ function toggleOptList(select) {
   const willOpen = optList.classList.contains("hidden");
 
   if (willOpen) {
+    const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
+
     optList.classList.remove("hidden");
     select.classList.add("active");
     select.setAttribute("aria-expanded", "true");
+    highlightOption(select, selectedOption);
   } else {
     deactivateSelect(select);
   }
@@ -1729,15 +1732,10 @@ function toggleOptList(select) {
 function deactivateSelect(select) {
   if (!select.classList.contains("active")) return;
 
-  const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
-
-  if (selectedOption) {
-    highlightOption(select, selectedOption);
-  }
-
   select.classList.remove("active");
   select.querySelector(".optList").classList.add("hidden");
   select.setAttribute("aria-expanded", "false");
+  select.removeAttribute("aria-activedescendant");
 }
 ```
 
@@ -1745,10 +1743,10 @@ function deactivateSelect(select) {
 
 We listen for `keydown` events and handle the following keys with a `switch` statement:
 
-- <kbd>ArrowDown</kbd> — move to the next option
-- <kbd>ArrowUp</kbd> — move to the previous option
-- <kbd>Home</kbd> — jump to the first option
-- <kbd>End</kbd> — jump to the last option
+- <kbd>ArrowDown</kbd> — open the list if collapsed; otherwise move to the next option
+- <kbd>ArrowUp</kbd> — open the list if collapsed; otherwise move to the previous option
+- <kbd>Home</kbd> — open the list if collapsed and jump to the first option; otherwise jump to the first option
+- <kbd>End</kbd> — open the list if collapsed and jump to the last option; otherwise jump to the last option
 - <kbd>Enter</kbd> / <kbd>Space</kbd> — toggle the option list open or closed
 - <kbd>Escape</kbd> — close the option list
 
@@ -1757,32 +1755,51 @@ Each case calls `event.preventDefault()` to prevent the browser's default scroll
 ```js
 select.addEventListener("keydown", (event) => {
   let index = getIndex(select);
+  const isOpen = !select.querySelector(".optList").classList.contains("hidden");
 
   switch (event.key) {
     case "ArrowDown":
       event.preventDefault();
-      if (index < optionList.length - 1) {
-        index++;
-        updateValue(select, index);
+      if (isOpen) {
+        if (index < optionList.length - 1) {
+          index++;
+          updateValue(select, index);
+        }
+      } else {
+        toggleOptList(select);
       }
       break;
 
     case "ArrowUp":
       event.preventDefault();
-      if (index > 0) {
-        index--;
-        updateValue(select, index);
+      if (isOpen) {
+        if (index > 0) {
+          index--;
+          updateValue(select, index);
+        }
+      } else {
+        toggleOptList(select);
       }
       break;
 
     case "Home":
       event.preventDefault();
-      updateValue(select, 0);
+      if (isOpen) {
+        updateValue(select, 0);
+      } else {
+        toggleOptList(select);
+        updateValue(select, 0);
+      }
       break;
 
     case "End":
       event.preventDefault();
-      updateValue(select, optionList.length - 1);
+      if (isOpen) {
+        updateValue(select, optionList.length - 1);
+      } else {
+        toggleOptList(select);
+        updateValue(select, optionList.length - 1);
+      }
       break;
 
     case "Enter":
@@ -2010,15 +2027,10 @@ Check out the [full source code here](/en-US/docs/Learn_web_development/Extensio
 function deactivateSelect(select) {
   if (!select.classList.contains("active")) return;
 
-  const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
-
-  if (selectedOption) {
-    highlightOption(select, selectedOption);
-  }
-
   select.classList.remove("active");
   select.querySelector(".optList").classList.add("hidden");
   select.setAttribute("aria-expanded", "false");
+  select.removeAttribute("aria-activedescendant");
 }
 
 function deactivateOtherSelects(select, selectList) {
@@ -2034,9 +2046,12 @@ function toggleOptList(select) {
   const willOpen = optList.classList.contains("hidden");
 
   if (willOpen) {
+    const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
+
     optList.classList.remove("hidden");
     select.classList.add("active");
     select.setAttribute("aria-expanded", "true");
+    highlightOption(select, selectedOption);
   } else {
     deactivateSelect(select);
   }
@@ -2099,6 +2114,7 @@ selectList.forEach((select) => {
   nativeWidget.setAttribute("aria-hidden", "true");
 
   updateValue(select, selectedIndex);
+  select.removeAttribute("aria-activedescendant");
 
   optionList.forEach((option, index) => {
     option.addEventListener("mousedown", (event) => {
@@ -2133,32 +2149,53 @@ selectList.forEach((select) => {
 
   select.addEventListener("keydown", (event) => {
     let index = getIndex(select);
+    const isOpen = !select
+      .querySelector(".optList")
+      .classList.contains("hidden");
 
     switch (event.key) {
       case "ArrowDown":
         event.preventDefault();
-        if (index < optionList.length - 1) {
-          index++;
-          updateValue(select, index);
+        if (isOpen) {
+          if (index < optionList.length - 1) {
+            index++;
+            updateValue(select, index);
+          }
+        } else {
+          toggleOptList(select);
         }
         break;
 
       case "ArrowUp":
         event.preventDefault();
-        if (index > 0) {
-          index--;
-          updateValue(select, index);
+        if (isOpen) {
+          if (index > 0) {
+            index--;
+            updateValue(select, index);
+          }
+        } else {
+          toggleOptList(select);
         }
         break;
 
       case "Home":
         event.preventDefault();
-        updateValue(select, 0);
+        if (isOpen) {
+          updateValue(select, 0);
+        } else {
+          toggleOptList(select);
+          updateValue(select, 0);
+        }
         break;
 
       case "End":
         event.preventDefault();
-        updateValue(select, optionList.length - 1);
+        if (isOpen) {
+          updateValue(select, optionList.length - 1);
+        } else {
+          toggleOptList(select);
+          updateValue(select, optionList.length - 1);
+        }
         break;
 
       case "Enter":
