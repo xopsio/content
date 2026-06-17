@@ -1743,10 +1743,10 @@ function deactivateSelect(select) {
 
 We listen for `keydown` events and handle the following keys with a `switch` statement:
 
-- <kbd>ArrowDown</kbd> — open the list if collapsed; otherwise move to the next option
-- <kbd>ArrowUp</kbd> — open the list if collapsed; otherwise move to the previous option
-- <kbd>Home</kbd> — open the list if collapsed and jump to the first option; otherwise jump to the first option
-- <kbd>End</kbd> — open the list if collapsed and jump to the last option; otherwise jump to the last option
+- <kbd>ArrowDown</kbd> — move to the next option
+- <kbd>ArrowUp</kbd> — move to the previous option
+- <kbd>Home</kbd> — jump to the first option
+- <kbd>End</kbd> — jump to the last option
 - <kbd>Enter</kbd> / <kbd>Space</kbd> — toggle the option list open or closed
 - <kbd>Escape</kbd> — close the option list
 
@@ -1760,45 +1760,39 @@ select.addEventListener("keydown", (event) => {
   switch (event.key) {
     case "ArrowDown":
       event.preventDefault();
-      if (isOpen) {
-        if (index < optionList.length - 1) {
-          index++;
-          updateValue(select, index);
+      if (index < optionList.length - 1) {
+        index++;
+        updateValue(select, index);
+        if (!isOpen) {
+          select.removeAttribute("aria-activedescendant");
         }
-      } else {
-        toggleOptList(select);
       }
       break;
 
     case "ArrowUp":
       event.preventDefault();
-      if (isOpen) {
-        if (index > 0) {
-          index--;
-          updateValue(select, index);
+      if (index > 0) {
+        index--;
+        updateValue(select, index);
+        if (!isOpen) {
+          select.removeAttribute("aria-activedescendant");
         }
-      } else {
-        toggleOptList(select);
       }
       break;
 
     case "Home":
       event.preventDefault();
-      if (isOpen) {
-        updateValue(select, 0);
-      } else {
-        toggleOptList(select);
-        updateValue(select, 0);
+      updateValue(select, 0);
+      if (!isOpen) {
+        select.removeAttribute("aria-activedescendant");
       }
       break;
 
     case "End":
       event.preventDefault();
-      if (isOpen) {
-        updateValue(select, optionList.length - 1);
-      } else {
-        toggleOptList(select);
-        updateValue(select, optionList.length - 1);
+      updateValue(select, optionList.length - 1);
+      if (!isOpen) {
+        select.removeAttribute("aria-activedescendant");
       }
       break;
 
@@ -2156,45 +2150,39 @@ selectList.forEach((select) => {
     switch (event.key) {
       case "ArrowDown":
         event.preventDefault();
-        if (isOpen) {
-          if (index < optionList.length - 1) {
-            index++;
-            updateValue(select, index);
+        if (index < optionList.length - 1) {
+          index++;
+          updateValue(select, index);
+          if (!isOpen) {
+            select.removeAttribute("aria-activedescendant");
           }
-        } else {
-          toggleOptList(select);
         }
         break;
 
       case "ArrowUp":
         event.preventDefault();
-        if (isOpen) {
-          if (index > 0) {
-            index--;
-            updateValue(select, index);
+        if (index > 0) {
+          index--;
+          updateValue(select, index);
+          if (!isOpen) {
+            select.removeAttribute("aria-activedescendant");
           }
-        } else {
-          toggleOptList(select);
         }
         break;
 
       case "Home":
         event.preventDefault();
-        if (isOpen) {
-          updateValue(select, 0);
-        } else {
-          toggleOptList(select);
-          updateValue(select, 0);
+        updateValue(select, 0);
+        if (!isOpen) {
+          select.removeAttribute("aria-activedescendant");
         }
         break;
 
       case "End":
         event.preventDefault();
-        if (isOpen) {
-          updateValue(select, optionList.length - 1);
-        } else {
-          toggleOptList(select);
-          updateValue(select, optionList.length - 1);
+        updateValue(select, optionList.length - 1);
+        if (!isOpen) {
+          select.removeAttribute("aria-activedescendant");
         }
         break;
 

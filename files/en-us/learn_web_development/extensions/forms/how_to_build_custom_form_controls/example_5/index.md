@@ -328,45 +328,39 @@ selectList.forEach((select) => {
     switch (event.key) {
       case "ArrowDown":
         event.preventDefault();
-        if (isOpen) {
-          if (index < optionList.length - 1) {
-            index++;
-            updateValue(select, index);
+        if (index < optionList.length - 1) {
+          index++;
+          updateValue(select, index);
+          if (!isOpen) {
+            select.removeAttribute("aria-activedescendant");
           }
-        } else {
-          toggleOptList(select);
         }
         break;
 
       case "ArrowUp":
         event.preventDefault();
-        if (isOpen) {
-          if (index > 0) {
-            index--;
-            updateValue(select, index);
+        if (index > 0) {
+          index--;
+          updateValue(select, index);
+          if (!isOpen) {
+            select.removeAttribute("aria-activedescendant");
           }
-        } else {
-          toggleOptList(select);
         }
         break;
 
       case "Home":
         event.preventDefault();
-        if (isOpen) {
-          updateValue(select, 0);
-        } else {
-          toggleOptList(select);
-          updateValue(select, 0);
+        updateValue(select, 0);
+        if (!isOpen) {
+          select.removeAttribute("aria-activedescendant");
         }
         break;
 
       case "End":
         event.preventDefault();
-        if (isOpen) {
-          updateValue(select, optionList.length - 1);
-        } else {
-          toggleOptList(select);
-          updateValue(select, optionList.length - 1);
+        updateValue(select, optionList.length - 1);
+        if (!isOpen) {
+          select.removeAttribute("aria-activedescendant");
         }
         break;
 
