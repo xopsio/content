@@ -26,45 +26,14 @@ This is the last example that explains [how to build custom form widgets](/en-US
     role="combobox"
     aria-label="Fruit"
     aria-haspopup="listbox"
-    aria-expanded="false"
-    aria-controls="fruit-options">
+    aria-expanded="false">
     <span class="value">Cherry</span>
-    <ul class="optList hidden" id="fruit-options" role="listbox">
-      <li
-        class="option"
-        id="fruit-option-0"
-        role="option"
-        aria-selected="true">
-        Cherry
-      </li>
-      <li
-        class="option"
-        id="fruit-option-1"
-        role="option"
-        aria-selected="false">
-        Lemon
-      </li>
-      <li
-        class="option"
-        id="fruit-option-2"
-        role="option"
-        aria-selected="false">
-        Banana
-      </li>
-      <li
-        class="option"
-        id="fruit-option-3"
-        role="option"
-        aria-selected="false">
-        Strawberry
-      </li>
-      <li
-        class="option"
-        id="fruit-option-4"
-        role="option"
-        aria-selected="false">
-        Apple
-      </li>
+    <ul class="optList hidden" role="listbox">
+      <li class="option" role="option" aria-selected="true">Cherry</li>
+      <li class="option" role="option" aria-selected="false">Lemon</li>
+      <li class="option" role="option" aria-selected="false">Banana</li>
+      <li class="option" role="option" aria-selected="false">Strawberry</li>
+      <li class="option" role="option" aria-selected="false">Apple</li>
     </ul>
   </div>
 </form>
@@ -207,6 +176,7 @@ function deactivateSelect(select) {
   optList.classList.add("hidden");
   select.classList.remove("active");
   select.setAttribute("aria-expanded", "false");
+  select.removeAttribute("aria-activedescendant");
 }
 
 function activeSelect(select, selectList) {
@@ -272,12 +242,21 @@ form.classList.add("widget");
 
 const selectList = document.querySelectorAll(".select");
 
-selectList.forEach((select) => {
+selectList.forEach((select, selectIndex) => {
   const optionList = select.querySelectorAll(".option");
   const selectedIndex = getIndex(select);
 
   select.tabIndex = 0;
   select.previousElementSibling.tabIndex = -1;
+
+  const optList = select.querySelector(".optList");
+  const listboxId = `custom-select-${selectIndex}-listbox`;
+  optList.id = listboxId;
+  select.setAttribute("aria-controls", listboxId);
+
+  optionList.forEach((option, optionIndex) => {
+    option.id = `custom-select-${selectIndex}-option-${optionIndex}`;
+  });
 
   updateValue(select, selectedIndex);
 
