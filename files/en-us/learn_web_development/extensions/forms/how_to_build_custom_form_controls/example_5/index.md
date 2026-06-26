@@ -220,7 +220,11 @@ function updateValue(select, index) {
     option.setAttribute("aria-selected", String(isSelected));
 
     if (isSelected) {
-      select.setAttribute("aria-activedescendant", option.id);
+      if (select.getAttribute("aria-expanded") === "true") {
+        select.setAttribute("aria-activedescendant", option.id);
+      } else {
+        select.removeAttribute("aria-activedescendant");
+      }
     }
   });
 }
