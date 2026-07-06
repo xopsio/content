@@ -1672,9 +1672,9 @@ To support these roles, we update our HTML like this:
 
 Using the [`role`](/en-US/docs/Web/Accessibility/ARIA/Guides/Techniques) attribute is not enough. [ARIA](/en-US/docs/Web/Accessibility/ARIA) also provides many states and property attributes. The more and better you use them, the better your control will be understood by assistive technologies.
 
-The `aria-selected` attribute is used to mark which option is currently selected; this lets assistive technologies inform the user what the current selection is. Each option also has a unique `id` so that the [`aria-activedescendant`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-activedescendant) attribute on the combobox container can point to the currently active option. We update this dynamically with JavaScript every time the user selects or navigates to a different option.
+The `aria-selected` attribute is used to mark which option is currently selected; this lets assistive technologies inform the user what the current selection is. Each option also has a unique `id` so that the [`aria-activedescendant`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-activedescendant) attribute on the combobox container can point to the currently active option. We update `aria-selected` every time the user selects a different option. We update `aria-activedescendant` only while the listbox is expanded; when the custom select is collapsed, we remove it so the combobox does not reference an option inside a hidden listbox.
 
-We use `updateValue()` dynamically with JavaScript to mark the selected option and update the active descendant each time the user chooses one:
+We use `updateValue()` dynamically with JavaScript to mark the selected option with `aria-selected`, and — while the listbox is expanded — to keep `aria-activedescendant` pointing at the active option:
 
 ```js
 function updateValue(select, index) {
