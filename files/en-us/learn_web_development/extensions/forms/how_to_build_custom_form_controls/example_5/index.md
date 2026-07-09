@@ -194,6 +194,10 @@ function toggleOptList(select) {
   optList.classList.toggle("hidden");
   select.classList.toggle("active", willOpen);
   select.setAttribute("aria-expanded", String(willOpen));
+
+  if (!willOpen) {
+    select.removeAttribute("aria-activedescendant");
+  }
 }
 
 function highlightOption(select, option) {
