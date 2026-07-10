@@ -233,6 +233,7 @@ Giorgio
 Golightly
 Googlebot
 Gordo
+Gorman
 Grahl
 Grande-Dixence
 Graywolf9
@@ -259,6 +260,7 @@ Hidde
 Highrise
 Hildy
 Hiroshi
+Hitman
 hmatrjp
 Hobday
 hochan
@@ -364,6 +366,7 @@ Lianghekou
 Libera.Chat
 Libertinus
 Lighttpd
+LINDDUN
 Lindenberg
 Lindesay
 Liskov
@@ -398,6 +401,7 @@ mcdetect
 McLellan
 McNally
 McVerry
+Mediabunny
 Megalosaurus
 Menard
 Mensah
@@ -480,6 +484,7 @@ Pereira
 Perlin
 Petrov
 Phong
+Picos
 Picryl
 Pinterest
 Pissuti
@@ -616,6 +621,7 @@ Tonisha
 Transcribear
 Transfonter
 Transformiix
+Treanor
 Trekhleb
 Trint
 Trish
@@ -680,6 +686,7 @@ Yoshi
 Yousafzai
 Yslow
 YubiKey
+YubiKeys
 Yuki
 Yura
 Yusuf

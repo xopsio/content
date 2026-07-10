@@ -4661,7 +4661,7 @@
     "modified": "2020-03-27T15:58:36.525Z",
     "contributors": ["RafeyIqbalRahman", "Iqbalh11", "Sheppy"]
   },
-  "Glossary/Stylesheet": {
+  "Glossary/Style_sheet": {
     "modified": "2019-12-03T08:33:18.728Z",
     "contributors": ["chrisdavidmills", "nicho110"]
   },
@@ -56137,10 +56137,6 @@
       "Sheppy",
       "Jeremie"
     ]
-  },
-  "Web/API/SVGRenderingIntent": {
-    "modified": "2020-10-15T21:53:52.961Z",
-    "contributors": ["fscholz", "Sebastianz"]
   },
   "Web/API/SVGSVGElement": {
     "modified": "2020-10-15T21:05:32.581Z",
