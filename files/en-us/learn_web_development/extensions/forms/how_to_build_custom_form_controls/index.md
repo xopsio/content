@@ -1716,7 +1716,12 @@ function toggleOptList(select) {
   select.classList.toggle("active", willOpen);
   select.setAttribute("aria-expanded", String(willOpen));
 
-  if (!willOpen) {
+  if (willOpen) {
+    const selected = select.querySelector('.option[aria-selected="true"]');
+    if (selected) {
+      select.setAttribute("aria-activedescendant", selected.id);
+    }
+  } else {
     select.removeAttribute("aria-activedescendant");
   }
 }
@@ -1997,7 +2002,12 @@ function toggleOptList(select) {
   select.classList.toggle("active", willOpen);
   select.setAttribute("aria-expanded", String(willOpen));
 
-  if (!willOpen) {
+  if (willOpen) {
+    const selected = select.querySelector('.option[aria-selected="true"]');
+    if (selected) {
+      select.setAttribute("aria-activedescendant", selected.id);
+    }
+  } else {
     select.removeAttribute("aria-activedescendant");
   }
 }
