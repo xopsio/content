@@ -1738,6 +1738,18 @@ function deactivateSelect(select) {
 }
 ```
 
+Because the `active` class now follows the expanded state — `toggleOptList()` toggles it together with `aria-expanded` — the `activeSelect()` function no longer needs to manage that class itself. Its only remaining job is to deactivate the other custom controls on the page:
+
+```js
+function activeSelect(select, selectList) {
+  selectList.forEach((other) => {
+    if (other !== select) {
+      deactivateSelect(other);
+    }
+  });
+}
+```
+
 ### Keyboard interaction
 
 To support keyboard accessibility, the control must be operable via keyboard. We listen for `keydown` events and use a `switch` statement to handle the following keys:
