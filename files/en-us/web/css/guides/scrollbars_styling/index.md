@@ -48,7 +48,8 @@ like being pleasant to touch and smell,
 like converting sunlight
 into food, like making it easier
 for us to breathe.
-</pre>
+</pre
+  >
   <p>
     - <a href="https://onbeing.org/poetry/a-small-needful-fact/">Ross Gay</a>
   </p>

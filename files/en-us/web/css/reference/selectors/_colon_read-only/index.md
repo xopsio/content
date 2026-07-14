@@ -72,7 +72,8 @@ The `:read-only` pseudo-class is used to remove all the styling that makes the i
 Viscous,
 Bright Ridge,
 CA
-</textarea>
+</textarea
+      >
     </div>
     <div>
       <label for="postal-code">Zip/postal code: </label>

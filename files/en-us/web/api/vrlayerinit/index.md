@@ -60,8 +60,12 @@ if (navigator.getVRDisplays) {
 
 ```js
 const init = {
-  leftBounds: [/* … */],
-  rightBounds: [/* … */],
+  leftBounds: [
+    /* … */
+  ],
+  rightBounds: [
+    /* … */
+  ],
   source: canvasReference,
 };
 ```

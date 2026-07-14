@@ -95,7 +95,9 @@ class AnyToU8Stream extends TransformStream {
 This is a useful one, where multiple streams can be conjoined. Examples include building a PWA with progressive loading and progressive streaming.
 
 ```js
-let responses = [/* conjoined response tree */];
+let responses = [
+  /* conjoined response tree */
+];
 let { readable, writable } = new TransformStream();
 
 responses.reduce(
