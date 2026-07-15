@@ -261,11 +261,13 @@ form.classList.add("widget");
 const selectList = document.querySelectorAll(".select");
 
 selectList.forEach((select, selectIndex) => {
+  const nativeWidget = select.previousElementSibling;
   const optionList = select.querySelectorAll(".option");
   const selectedIndex = getIndex(select);
 
   select.tabIndex = 0;
-  select.previousElementSibling.tabIndex = -1;
+  nativeWidget.tabIndex = -1;
+  nativeWidget.setAttribute("aria-hidden", "true");
 
   const optList = select.querySelector(".optList");
   const listboxId = `custom-select-${selectIndex}-listbox`;
