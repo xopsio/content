@@ -1729,6 +1729,11 @@ function toggleOptList(select) {
 function deactivateSelect(select) {
   if (!select.classList.contains("active")) return;
 
+  const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
+  if (selectedOption) {
+    highlightOption(select, selectedOption);
+  }
+
   const optList = select.querySelector(".optList");
 
   optList.classList.add("hidden");
@@ -1737,6 +1742,8 @@ function deactivateSelect(select) {
   select.removeAttribute("aria-activedescendant");
 }
 ```
+
+Before closing, `deactivateSelect()` also moves the visual highlight back to the currently selected option, so that an option highlighted only by hovering does not stay highlighted the next time the list opens.
 
 Because the `active` class now follows the expanded state — `toggleOptList()` toggles it together with `aria-expanded` — the `activeSelect()` function no longer needs to manage that class itself. Its only remaining job is to deactivate the other custom controls on the page:
 
