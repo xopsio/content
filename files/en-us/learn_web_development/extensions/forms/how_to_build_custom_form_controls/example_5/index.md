@@ -5,7 +5,7 @@ page-type: learn-module-chapter
 sidebar: learnsidebar
 ---
 
-This is the last example that explain [how to build custom form widgets](/en-US/docs/Learn_web_development/Extensions/Forms/How_to_build_custom_form_controls).
+This is the last example that explains [how to build custom form widgets](/en-US/docs/Learn_web_development/Extensions/Forms/How_to_build_custom_form_controls).
 
 ## Change states
 
@@ -13,7 +13,7 @@ This is the last example that explain [how to build custom form widgets](/en-US/
 
 ```html
 <form class="no-widget">
-  <select name="myFruit">
+  <select name="myFruit" id="myFruit" aria-label="Fruit">
     <option>Cherry</option>
     <option>Lemon</option>
     <option>Banana</option>
@@ -21,14 +21,19 @@ This is the last example that explain [how to build custom form widgets](/en-US/
     <option>Apple</option>
   </select>
 
-  <div class="select" role="listbox">
+  <div
+    class="select"
+    role="combobox"
+    aria-label="Fruit"
+    aria-haspopup="listbox"
+    aria-expanded="false">
     <span class="value">Cherry</span>
-    <ul class="optList hidden" role="presentation">
+    <ul class="optList hidden" role="listbox">
       <li class="option" role="option" aria-selected="true">Cherry</li>
-      <li class="option" role="option">Lemon</li>
-      <li class="option" role="option">Banana</li>
-      <li class="option" role="option">Strawberry</li>
-      <li class="option" role="option">Apple</li>
+      <li class="option" role="option" aria-selected="false">Lemon</li>
+      <li class="option" role="option" aria-selected="false">Banana</li>
+      <li class="option" role="option" aria-selected="false">Strawberry</li>
+      <li class="option" role="option" aria-selected="false">Apple</li>
     </ul>
   </div>
 </form>
@@ -166,23 +171,43 @@ This is the last example that explain [how to build custom form widgets](/en-US/
 function deactivateSelect(select) {
   if (!select.classList.contains("active")) return;
 
+  const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
+  if (selectedOption) {
+    highlightOption(select, selectedOption);
+  }
+
   const optList = select.querySelector(".optList");
 
   optList.classList.add("hidden");
   select.classList.remove("active");
+  select.setAttribute("aria-expanded", "false");
+  select.removeAttribute("aria-activedescendant");
 }
 
 function activeSelect(select, selectList) {
-  if (select.classList.contains("active")) return;
-
-  selectList.forEach(deactivateSelect);
-  select.classList.add("active");
+  selectList.forEach((other) => {
+    if (other !== select) {
+      deactivateSelect(other);
+    }
+  });
 }
 
-function toggleOptList(select, show) {
+function toggleOptList(select) {
   const optList = select.querySelector(".optList");
+  const willOpen = optList.classList.contains("hidden");
 
   optList.classList.toggle("hidden");
+  select.classList.toggle("active", willOpen);
+  select.setAttribute("aria-expanded", String(willOpen));
+
+  if (willOpen) {
+    const selected = select.querySelector('.option[aria-selected="true"]');
+    if (selected) {
+      select.setAttribute("aria-activedescendant", selected.id);
+    }
+  } else {
+    select.removeAttribute("aria-activedescendant");
+  }
 }
 
 function highlightOption(select, option) {
@@ -200,15 +225,22 @@ function updateValue(select, index) {
   const value = select.querySelector(".value");
   const optionList = select.querySelectorAll(".option");
 
-  optionList.forEach((other) => {
-    other.setAttribute("aria-selected", "false");
-  });
-
-  optionList[index].setAttribute("aria-selected", "true");
-
   nativeWidget.selectedIndex = index;
   value.textContent = optionList[index].textContent;
-  highlightOption(select, optionList[index]);
+
+  optionList.forEach((option, optionIndex) => {
+    const isSelected = optionIndex === index;
+    option.classList.toggle("highlight", isSelected);
+    option.setAttribute("aria-selected", String(isSelected));
+
+    if (isSelected) {
+      if (select.getAttribute("aria-expanded") === "true") {
+        select.setAttribute("aria-activedescendant", option.id);
+      } else {
+        select.removeAttribute("aria-activedescendant");
+      }
+    }
+  });
 }
 
 function getIndex(select) {
@@ -228,57 +260,97 @@ form.classList.add("widget");
 
 const selectList = document.querySelectorAll(".select");
 
-selectList.forEach((select) => {
+selectList.forEach((select, selectIndex) => {
+  const nativeWidget = select.previousElementSibling;
   const optionList = select.querySelectorAll(".option");
   const selectedIndex = getIndex(select);
 
   select.tabIndex = 0;
-  select.previousElementSibling.tabIndex = -1;
+  nativeWidget.tabIndex = -1;
+  nativeWidget.setAttribute("aria-hidden", "true");
+
+  const optList = select.querySelector(".optList");
+  const listboxId = `custom-select-${selectIndex}-listbox`;
+  optList.id = listboxId;
+  select.setAttribute("aria-controls", listboxId);
+
+  optionList.forEach((option, optionIndex) => {
+    option.id = `custom-select-${selectIndex}-option-${optionIndex}`;
+  });
 
   updateValue(select, selectedIndex);
 
   optionList.forEach((option, index) => {
+    option.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+    });
+
     option.addEventListener("mouseover", () => {
       highlightOption(select, option);
     });
 
     option.addEventListener("click", (event) => {
+      event.stopPropagation();
       updateValue(select, index);
+      deactivateSelect(select);
+      select.focus();
     });
   });
 
   select.addEventListener("click", (event) => {
+    if (event.target.closest(".option")) return;
     toggleOptList(select);
   });
 
-  select.addEventListener("focus", (event) => {
+  select.addEventListener("focus", () => {
     activeSelect(select, selectList);
   });
 
-  select.addEventListener("blur", (event) => {
+  select.addEventListener("blur", () => {
     deactivateSelect(select);
   });
 
-  select.addEventListener("keyup", (event) => {
+  select.addEventListener("keydown", (event) => {
     let index = getIndex(select);
 
-    if (event.key === "Escape") {
-      deactivateSelect(select);
-    }
-    if (event.key === "ArrowDown" && index < optionList.length - 1) {
-      index++;
-      event.preventDefault();
-    }
-    if (event.key === "ArrowUp" && index > 0) {
-      index--;
-      event.preventDefault();
-    }
+    switch (event.key) {
+      case "ArrowDown":
+        event.preventDefault();
+        if (index < optionList.length - 1) {
+          index++;
+          updateValue(select, index);
+        }
+        break;
 
-    if (event.key === "Enter" || event.key === " ") {
-      toggleOptList(select);
-    }
+      case "ArrowUp":
+        event.preventDefault();
+        if (index > 0) {
+          index--;
+          updateValue(select, index);
+        }
+        break;
 
-    updateValue(select, index);
+      case "Home":
+        event.preventDefault();
+        updateValue(select, 0);
+        break;
+
+      case "End":
+        event.preventDefault();
+        updateValue(select, optionList.length - 1);
+        break;
+
+      case "Enter":
+      case " ":
+        event.preventDefault();
+        toggleOptList(select);
+        break;
+
+      case "Escape":
+        event.preventDefault();
+        deactivateSelect(select);
+        break;
+    }
   });
 });
 ```
