@@ -1999,6 +1999,11 @@ Check out the [full source code here](/en-US/docs/Learn_web_development/Extensio
 function deactivateSelect(select) {
   if (!select.classList.contains("active")) return;
 
+  const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
+  if (selectedOption) {
+    highlightOption(select, selectedOption);
+  }
+
   const optList = select.querySelector(".optList");
 
   optList.classList.add("hidden");
