@@ -354,6 +354,9 @@ selectList.forEach((select, selectIndex) => {
         event.preventDefault();
         deactivateSelect(select);
         break;
+      default:
+        // Ignore all other keys
+        return;
     }
   });
 });
