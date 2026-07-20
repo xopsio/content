@@ -1729,7 +1729,9 @@ function toggleOptList(select) {
 }
 
 function deactivateSelect(select) {
-  if (!select.classList.contains("active")) return;
+  if (!select.classList.contains("active")) {
+    return;
+  }
 
   const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
   if (selectedOption) {
@@ -1747,10 +1749,10 @@ function deactivateSelect(select) {
 
 Before closing, `deactivateSelect()` also moves the visual highlight back to the currently selected option, so that an option highlighted only by hovering does not stay highlighted the next time the list opens.
 
-Because the `active` class now follows the expanded state — `toggleOptList()` toggles it together with `aria-expanded` — the `activeSelect()` function no longer needs to manage that class itself. Its only remaining job is to deactivate the other custom controls on the page:
+Because the `active` class now follows the expanded state — `toggleOptList()` toggles it together with `aria-expanded` — the `activeSelect()` function no longer needs to manage that class itself. Its only remaining job is to deactivate the other custom controls on the page, so it is renamed to `deactivateOtherSelects()`:
 
 ```js
-function activeSelect(select, selectList) {
+function deactivateOtherSelects(select, selectList) {
   selectList.forEach((other) => {
     if (other !== select) {
       deactivateSelect(other);
@@ -1838,7 +1840,9 @@ optionList.forEach((option, index) => {
 });
 
 select.addEventListener("click", (event) => {
-  if (event.target.closest(".option")) return;
+  if (event.target instanceof Element && event.target.closest(".option")) {
+    return;
+  }
   toggleOptList(select);
 });
 ```
@@ -1997,7 +2001,9 @@ Check out the [full source code here](/en-US/docs/Learn_web_development/Extensio
 // -------------------- //
 
 function deactivateSelect(select) {
-  if (!select.classList.contains("active")) return;
+  if (!select.classList.contains("active")) {
+    return;
+  }
 
   const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
   if (selectedOption) {
@@ -2012,7 +2018,7 @@ function deactivateSelect(select) {
   select.removeAttribute("aria-activedescendant");
 }
 
-function activeSelect(select, selectList) {
+function deactivateOtherSelects(select, selectList) {
   selectList.forEach((other) => {
     if (other !== select) {
       deactivateSelect(other);
@@ -2126,12 +2132,14 @@ selectList.forEach((select, selectIndex) => {
   });
 
   select.addEventListener("click", (event) => {
-    if (event.target.closest(".option")) return;
+    if (event.target instanceof Element && event.target.closest(".option")) {
+      return;
+    }
     toggleOptList(select);
   });
 
   select.addEventListener("focus", () => {
-    activeSelect(select, selectList);
+    deactivateOtherSelects(select, selectList);
   });
 
   select.addEventListener("blur", () => {
