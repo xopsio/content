@@ -169,7 +169,9 @@ This is the last example that explains [how to build custom form widgets](/en-US
 // -------------------- //
 
 function deactivateSelect(select) {
-  if (!select.classList.contains("active")) return;
+  if (!select.classList.contains("active")) {
+    return;
+  }
 
   const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
   if (selectedOption) {
@@ -184,7 +186,7 @@ function deactivateSelect(select) {
   select.removeAttribute("aria-activedescendant");
 }
 
-function activeSelect(select, selectList) {
+function deactivateOtherSelects(select, selectList) {
   selectList.forEach((other) => {
     if (other !== select) {
       deactivateSelect(other);
@@ -298,12 +300,14 @@ selectList.forEach((select, selectIndex) => {
   });
 
   select.addEventListener("click", (event) => {
-    if (event.target.closest(".option")) return;
+    if (event.target instanceof Element && event.target.closest(".option")) {
+      return;
+    }
     toggleOptList(select);
   });
 
   select.addEventListener("focus", () => {
-    activeSelect(select, selectList);
+    deactivateOtherSelects(select, selectList);
   });
 
   select.addEventListener("blur", () => {
