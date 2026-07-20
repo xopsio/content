@@ -1815,6 +1815,9 @@ select.addEventListener("keydown", (event) => {
       event.preventDefault();
       deactivateSelect(select);
       break;
+    default:
+      // Ignore all other keys
+      return;
   }
 });
 ```
@@ -2186,6 +2189,9 @@ selectList.forEach((select, selectIndex) => {
         event.preventDefault();
         deactivateSelect(select);
         break;
+      default:
+        // Ignore all other keys
+        return;
     }
   });
 });
