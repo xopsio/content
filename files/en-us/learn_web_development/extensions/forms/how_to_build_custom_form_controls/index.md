@@ -711,6 +711,13 @@ Second, we need two new classes to let us hide the unneeded element: we visually
 
 This CSS visually hides one of the elements, but it is still available to screen readers.
 
+> [!NOTE]
+> This tutorial retains the earlier visual-hiding technique. Before
+> JavaScript runs, the native select is the intended fallback, but the
+> visually hidden custom control may also remain exposed to assistive
+> technologies. Production code should keep the inactive custom control out
+> of the accessibility tree until enhancement succeeds.
+
 Now we need a JavaScript switch to determine if the script is running or not. This switch is a couple of lines: if at page load time our script is running, it will remove the `no-widget` class and add the `widget` class, thereby swapping the visibility of the {{HTMLElement("select")}} element and the custom control.
 
 ```js
@@ -1668,7 +1675,12 @@ To support these roles, we update our HTML like this:
 ```
 
 > [!NOTE]
-> Including both the `role` attribute and a `class` attribute is not necessary. Instead of using `.option` use the `[role="option"]` [attribute selectors](/en-US/docs/Web/CSS/Reference/Selectors/Attribute_selectors) in your CSS.
+> In this tutorial, we keep both the `role` attribute and the `class`
+> attribute: the role provides semantics for assistive technologies, while
+> the class names are used by the CSS and JavaScript. In a more generic
+> implementation, you could instead use selectors such as
+> `[role="option"]`, provided that you update the CSS and JavaScript
+> consistently.
 
 ### The `aria-selected` and `aria-activedescendant` attributes
 
@@ -1678,11 +1690,11 @@ The `aria-selected` attribute identifies the option the user has committed to as
 
 Three functions cooperate to keep these attributes in sync with the control's state:
 
-- `toggleOptList()` initializes `aria-activedescendant` to the `aria-selected` option when the list opens, and removes `aria-activedescendant` when the list closes.
+- `toggleOptList()` initializes `aria-activedescendant` to the `aria-selected` option when the list opens. When it is called while the list is already open, it delegates closing to `deactivateSelect()`.
 - `updateValue()` updates `aria-selected`, the native `selectedIndex`, the visible value, the visual highlight, and `aria-activedescendant` only when a selection is committed (by keyboard navigation, by clicking an option, or during initial setup).
 - `highlightOption()` updates the visual highlight and — while the listbox is expanded — `aria-activedescendant` during pointer hover. Pointer hover can temporarily move the active highlight without changing `aria-selected` or the native `<select>`'s value.
 
-Before closing the listbox, `deactivateSelect()` restores the visual highlight to the selected option and removes `aria-activedescendant`, so that an option highlighted only by hovering does not stay highlighted the next time the list opens, and the collapsed combobox does not reference an option inside a hidden listbox.
+Every final close path is centralized through `deactivateSelect()`, which restores the committed selected option's visual highlight, sets `aria-expanded` to `"false"`, and removes `aria-activedescendant`. See [Updating the expanded state](#updating_the_expanded_state) below for the code.
 
 `updateValue()` is the only place where the committed selection changes:
 
@@ -1733,24 +1745,25 @@ It might have seemed simpler to let a screen reader focus on the off-screen sele
 
 ### Updating the expanded state
 
-The [`aria-expanded`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-expanded) attribute indicates whether the option list is currently open or closed. We update it in both `toggleOptList()` and `deactivateSelect()`:
+The [`aria-expanded`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-expanded) attribute indicates whether the option list is currently open or closed. `toggleOptList()` opens the list directly and sets `aria-expanded` to `"true"`; when it is called while the list is already open, it delegates closing to `deactivateSelect()`, which sets `aria-expanded` to `"false"`. The open path also initializes `aria-activedescendant` to the `aria-selected` option so that pointer hover and visual highlight start pointing at the same selected option:
 
 ```js
 function toggleOptList(select) {
   const optList = select.querySelector(".optList");
   const willOpen = optList.classList.contains("hidden");
 
-  optList.classList.toggle("hidden");
-  select.classList.toggle("active", willOpen);
-  select.setAttribute("aria-expanded", String(willOpen));
+  if (!willOpen) {
+    deactivateSelect(select);
+    return;
+  }
 
-  if (willOpen) {
-    const selected = select.querySelector('.option[aria-selected="true"]');
-    if (selected) {
-      select.setAttribute("aria-activedescendant", selected.id);
-    }
-  } else {
-    select.removeAttribute("aria-activedescendant");
+  optList.classList.remove("hidden");
+  select.classList.add("active");
+  select.setAttribute("aria-expanded", "true");
+
+  const selected = select.querySelector('.option[aria-selected="true"]');
+  if (selected) {
+    select.setAttribute("aria-activedescendant", selected.id);
   }
 }
 
@@ -1773,9 +1786,9 @@ function deactivateSelect(select) {
 }
 ```
 
-Before closing, `deactivateSelect()` also moves the visual highlight back to the currently selected option and removes `aria-activedescendant`, so that an option highlighted only by hovering does not stay highlighted the next time the list opens, and the collapsed combobox does not reference an option inside a hidden listbox.
+Every final close path is centralized through `deactivateSelect()`. Whether the listbox is closed by pressing <kbd>Escape</kbd>, by pressing <kbd>Enter</kbd> or <kbd>Space</kbd> while open, by clicking the body of an open select, by clicking an option, by the control losing focus, or by focusing another custom control, the close goes through `deactivateSelect()`. In every case, `deactivateSelect()` restores the committed selected option's visual highlight, sets `aria-expanded` to `"false"`, and removes `aria-activedescendant`, so that an option highlighted only by hovering does not stay highlighted the next time the list opens, and the collapsed combobox does not reference an option inside a hidden listbox.
 
-Because the `active` class now follows the expanded state — `toggleOptList()` toggles it together with `aria-expanded` — the `activeSelect()` function no longer needs to manage that class itself. Its only remaining job is to deactivate the other custom controls on the page, so it is renamed to `deactivateOtherSelects()`:
+Because the `active` class now follows the expanded state — `toggleOptList()` sets it on open and `deactivateSelect()` removes it on close — the `activeSelect()` function no longer needs to manage that class itself. Its only remaining job is to deactivate the other custom controls on the page, so it is renamed to `deactivateOtherSelects()`:
 
 ```js
 function deactivateOtherSelects(select, selectList) {
@@ -2059,17 +2072,18 @@ function toggleOptList(select) {
   const optList = select.querySelector(".optList");
   const willOpen = optList.classList.contains("hidden");
 
-  optList.classList.toggle("hidden");
-  select.classList.toggle("active", willOpen);
-  select.setAttribute("aria-expanded", String(willOpen));
+  if (!willOpen) {
+    deactivateSelect(select);
+    return;
+  }
 
-  if (willOpen) {
-    const selected = select.querySelector('.option[aria-selected="true"]');
-    if (selected) {
-      select.setAttribute("aria-activedescendant", selected.id);
-    }
-  } else {
-    select.removeAttribute("aria-activedescendant");
+  optList.classList.remove("hidden");
+  select.classList.add("active");
+  select.setAttribute("aria-expanded", "true");
+
+  const selected = select.querySelector('.option[aria-selected="true"]');
+  if (selected) {
+    select.setAttribute("aria-activedescendant", selected.id);
   }
 }
 
