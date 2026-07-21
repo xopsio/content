@@ -198,17 +198,18 @@ function toggleOptList(select) {
   const optList = select.querySelector(".optList");
   const willOpen = optList.classList.contains("hidden");
 
-  optList.classList.toggle("hidden");
-  select.classList.toggle("active", willOpen);
-  select.setAttribute("aria-expanded", String(willOpen));
+  if (!willOpen) {
+    deactivateSelect(select);
+    return;
+  }
 
-  if (willOpen) {
-    const selected = select.querySelector('.option[aria-selected="true"]');
-    if (selected) {
-      select.setAttribute("aria-activedescendant", selected.id);
-    }
-  } else {
-    select.removeAttribute("aria-activedescendant");
+  optList.classList.remove("hidden");
+  select.classList.add("active");
+  select.setAttribute("aria-expanded", "true");
+
+  const selected = select.querySelector('.option[aria-selected="true"]');
+  if (selected) {
+    select.setAttribute("aria-activedescendant", selected.id);
   }
 }
 
