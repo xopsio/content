@@ -220,6 +220,10 @@ function highlightOption(select, option) {
   });
 
   option.classList.add("highlight");
+
+  if (select.getAttribute("aria-expanded") === "true") {
+    select.setAttribute("aria-activedescendant", option.id);
+  }
 }
 
 function updateValue(select, index) {
