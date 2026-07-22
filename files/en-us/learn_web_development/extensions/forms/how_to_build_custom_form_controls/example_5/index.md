@@ -42,7 +42,10 @@ This is the last example that explains [how to build custom form widgets](/en-US
 ### CSS
 
 ```css
-.widget select,
+.widget select {
+  display: none;
+}
+
 .no-widget .select {
   position: absolute;
   left: -5000em;
@@ -265,16 +268,13 @@ const form = document.querySelector("form");
 form.classList.remove("no-widget");
 form.classList.add("widget");
 
-const selectList = document.querySelectorAll(".select");
+const selectList = form.querySelectorAll(".select");
 
 selectList.forEach((select, selectIndex) => {
-  const nativeWidget = select.previousElementSibling;
   const optionList = select.querySelectorAll(".option");
   const selectedIndex = getIndex(select);
 
   select.tabIndex = 0;
-  nativeWidget.tabIndex = -1;
-  nativeWidget.setAttribute("aria-hidden", "true");
 
   const optList = select.querySelector(".optList");
   const listboxId = `custom-select-${selectIndex}-listbox`;

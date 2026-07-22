@@ -1370,7 +1370,7 @@ selectList.forEach((select) => {
 });
 ```
 
-In the code above, it's worth noting the use of the [`tabIndex`](/en-US/docs/Web/API/HTMLElement/tabIndex) property. Using this property is necessary to ensure that the native control will never gain focus, and to make sure that our custom control gains focus when the user uses their keyboard or mouse.
+In the code above, it's worth noting the use of the [`tabIndex`](/en-US/docs/Web/API/HTMLElement/tabIndex) property. Setting `select.previousElementSibling.tabIndex = -1` removes the native control from sequential keyboard navigation, and setting `select.tabIndex = 0` makes the custom control focusable so that it gains focus when the user uses their keyboard or mouse. A negative tabindex removes an element from sequential keyboard navigation, but it does not prevent the element from being focused programmatically.
 
 With that, we're done!
 
@@ -1641,13 +1641,13 @@ Fortunately, there is a solution and it's called [ARIA](/en-US/docs/Web/Accessib
 The key attribute used by [ARIA](/en-US/docs/Web/Accessibility/ARIA) is the [`role`](/en-US/docs/Web/Accessibility/ARIA/Guides/Techniques) attribute. The [`role`](/en-US/docs/Web/Accessibility/ARIA/Guides/Techniques) attribute accepts a value that defines what an element is used for. Each role defines its own requirements and behaviors.
 
 In our example, the outer `<div>` container uses [`role="combobox"`](/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/combobox_role), which indicates that the element presents a list of options that can be expanded or collapsed. We also add [`aria-haspopup="listbox"`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-haspopup) to declare the type of popup, and [`aria-controls`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-controls) to point to the option list's `id`.
-Because a page can contain more than one custom control, we don't hardcode these IDs in the HTML — duplicate IDs would break the ARIA references. Instead, the JavaScript generates a unique `id` for each control's listbox and each of its options during initialization, and sets `aria-controls` to point to the generated listbox `id`.
+Because the initialized form can contain more than one custom control, we don't hardcode these IDs in the HTML — duplicate IDs would break the ARIA references. Instead, the JavaScript generates a unique `id` for each control's listbox and each of its options during initialization, and sets `aria-controls` to point to the generated listbox `id`.
 
 The `<ul>` element uses [`role="listbox"`](/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/listbox_role), which tells assistive technologies that the element presents a list of selectable items. Each `<li>` element uses [`role="option"`](/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/option_role).
 
 Both the native `<select>` and the custom `<div>` receive an [`aria-label="Fruit"`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-label) attribute so that assistive technologies can announce a meaningful name for the control.
 
-The native `<select>` keeps its `aria-label` as a no-JavaScript fallback. When JavaScript enables the custom widget, the native `<select>` is removed from the tab order and accessibility tree using `tabIndex = -1` and `aria-hidden="true"`, leaving the custom combobox as the exposed accessible control.
+The native `<select>` keeps its accessible name as a no-JavaScript fallback. When JavaScript enables the custom widget, the final CSS shown below removes the native control from rendering, focus navigation, and the accessibility tree, leaving the custom combobox as the exposed accessible control.
 
 To support these roles, we update our HTML like this:
 
@@ -1681,6 +1681,30 @@ To support these roles, we update our HTML like this:
 > implementation, you could instead use selectors such as
 > `[role="option"]`, provided that you update the CSS and JavaScript
 > consistently.
+
+In the earlier stages, the inactive control is moved off-screen so that it
+remains available to assistive technologies. In the final accessible
+version, the two inactive states need different behavior. Before JavaScript
+runs, the custom control keeps the earlier off-screen fallback styling.
+After enhancement succeeds, the native select uses `display: none`, so that
+only the custom combobox is rendered, focusable, and exposed to assistive
+technologies:
+
+```css
+.widget select {
+  display: none;
+}
+
+.no-widget .select {
+  position: absolute;
+  left: -5000em;
+  height: 0;
+  overflow: hidden;
+}
+```
+
+The native `<select>` remains associated with the form, and `updateValue()`
+keeps its selected value synchronized for form submission.
 
 ### The `aria-selected` and `aria-activedescendant` attributes
 
@@ -1745,7 +1769,7 @@ It might have seemed simpler to let a screen reader focus on the off-screen sele
 
 ### Updating the expanded state
 
-The [`aria-expanded`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-expanded) attribute indicates whether the option list is currently open or closed. `toggleOptList()` opens the list directly and sets `aria-expanded` to `"true"`; when it is called while the list is already open, it delegates closing to `deactivateSelect()`, which sets `aria-expanded` to `"false"`. The open path also initializes `aria-activedescendant` to the `aria-selected` option so that pointer hover and visual highlight start pointing at the same selected option:
+The [`aria-expanded`](/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-expanded) attribute indicates whether the option list is currently open or closed. `toggleOptList()` opens the list directly and sets `aria-expanded` to `"true"`; when it is called while the list is already open, it delegates closing to `deactivateSelect()`, which sets `aria-expanded` to `"false"`. The open path also initializes `aria-activedescendant` to the `aria-selected` option, aligning the active descendant and the visual highlight when the list opens:
 
 ```js
 function toggleOptList(select) {
@@ -1926,7 +1950,10 @@ Check out the [full source code here](/en-US/docs/Learn_web_development/Extensio
 ```
 
 ```css hidden
-.widget select,
+.widget select {
+  display: none;
+}
+
 .no-widget .select {
   position: absolute;
   left: -5000em;
@@ -2139,16 +2166,13 @@ const form = document.querySelector("form");
 form.classList.remove("no-widget");
 form.classList.add("widget");
 
-const selectList = document.querySelectorAll(".select");
+const selectList = form.querySelectorAll(".select");
 
 selectList.forEach((select, selectIndex) => {
-  const nativeWidget = select.previousElementSibling;
   const optionList = select.querySelectorAll(".option");
   const selectedIndex = getIndex(select);
 
   select.tabIndex = 0;
-  nativeWidget.tabIndex = -1;
-  nativeWidget.setAttribute("aria-hidden", "true");
 
   const optList = select.querySelector(".optList");
   const listboxId = `custom-select-${selectIndex}-listbox`;
