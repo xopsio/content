@@ -283,9 +283,6 @@ function getActiveIndex(select, optionList) {
 
 const form = document.querySelector("form");
 
-form.classList.remove("no-widget");
-form.classList.add("widget");
-
 const selectList = form.querySelectorAll(".select");
 
 selectList.forEach((select, selectIndex) => {
@@ -383,6 +380,9 @@ selectList.forEach((select, selectIndex) => {
     }
   });
 });
+
+form.classList.remove("no-widget");
+form.classList.add("widget");
 ```
 
 ### Result

@@ -1930,6 +1930,8 @@ The native `<select>` element is kept in sync via `nativeWidget.selectedIndex = 
 
 Below is the final result of all these changes (you'll get a better feel for this by trying it with an assistive technology such as [NVDA](https://www.nvaccess.org/) or [VoiceOver](https://www.apple.com/accessibility/features/?vision)).
 
+The form switches to the `widget` state only after every custom select has been initialized. If synchronous initialization stops before that point, the original `no-widget` state keeps the native controls available.
+
 #### Live example
 
 Check out the [full source code here](/en-US/docs/Learn_web_development/Extensions/Forms/How_to_build_custom_form_controls/Example_5).
@@ -2194,9 +2196,6 @@ function getActiveIndex(select, optionList) {
 
 const form = document.querySelector("form");
 
-form.classList.remove("no-widget");
-form.classList.add("widget");
-
 const selectList = form.querySelectorAll(".select");
 
 selectList.forEach((select, selectIndex) => {
@@ -2294,6 +2293,9 @@ selectList.forEach((select, selectIndex) => {
     }
   });
 });
+
+form.classList.remove("no-widget");
+form.classList.add("widget");
 ```
 
 {{EmbedLiveSample("live_example_3",120,130)}}
