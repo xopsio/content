@@ -1831,11 +1831,28 @@ To support keyboard accessibility, the control must be operable via keyboard. We
 - <kbd>Enter</kbd> / <kbd>Space</kbd> — toggle the option list open or closed
 - <kbd>Escape</kbd> — close the option list
 
-Each case calls `event.preventDefault()` to prevent the browser's default scrolling or form submission behavior:
+Each case calls `event.preventDefault()` to prevent the browser's default scrolling or form submission behavior. When the custom select is collapsed, Arrow Up, Arrow Down, Home, and End update the selected value without opening the listbox, matching the behavior of a native `<select>`. When the listbox is expanded, Arrow Up and Arrow Down start from the currently highlighted active option rather than from the committed selection, so keyboard navigation continues from where a previous keystroke or hover left off. The starting index is derived by a small helper, `getActiveIndex()`, which falls back to the committed selection returned by `getIndex()` while the listbox is collapsed or when the active descendant is missing or no longer matches an option:
+
+```js
+function getActiveIndex(select, optionList) {
+  if (select.getAttribute("aria-expanded") === "true") {
+    const activeId = select.getAttribute("aria-activedescendant");
+    const index = [...optionList].findIndex((option) => option.id === activeId);
+
+    if (index !== -1) {
+      return index;
+    }
+  }
+
+  return getIndex(select);
+}
+```
+
+The `keydown` handler uses that helper to derive its starting index:
 
 ```js
 select.addEventListener("keydown", (event) => {
-  let index = getIndex(select);
+  let index = getActiveIndex(select, optionList);
 
   switch (event.key) {
     case "ArrowDown":
@@ -2147,6 +2164,30 @@ function getIndex(select) {
   return nativeWidget.selectedIndex;
 }
 
+// This function returns the index of the currently active option in the listbox
+// when the custom select is expanded. While expanded, hover and keyboard
+// navigation can temporarily move `aria-activedescendant` away from the
+// committed selection, so keyboard navigation should continue from the
+// currently active highlighted option rather than from the committed
+// selection. If the custom select is collapsed, or if the active descendant
+// is missing or no longer matches an option, we fall back to the committed
+// selection returned by `getIndex()`.
+// It takes two parameters:
+// select     : the DOM node with the class `select` related to the native control
+// optionList : the list of options for the given custom control
+function getActiveIndex(select, optionList) {
+  if (select.getAttribute("aria-expanded") === "true") {
+    const activeId = select.getAttribute("aria-activedescendant");
+    const index = [...optionList].findIndex((option) => option.id === activeId);
+
+    if (index !== -1) {
+      return index;
+    }
+  }
+
+  return getIndex(select);
+}
+
 // ------------- //
 // Event binding //
 // ------------- //
@@ -2208,7 +2249,7 @@ selectList.forEach((select, selectIndex) => {
   });
 
   select.addEventListener("keydown", (event) => {
-    let index = getIndex(select);
+    let index = getActiveIndex(select, optionList);
 
     switch (event.key) {
       case "ArrowDown":

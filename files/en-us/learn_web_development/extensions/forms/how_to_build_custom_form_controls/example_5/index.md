@@ -253,6 +253,30 @@ function getIndex(select) {
   return nativeWidget.selectedIndex;
 }
 
+// This function returns the index of the currently active option in the listbox
+// when the custom select is expanded. While expanded, hover and keyboard
+// navigation can temporarily move `aria-activedescendant` away from the
+// committed selection, so keyboard navigation should continue from the
+// currently active highlighted option rather than from the committed
+// selection. If the custom select is collapsed, or if the active descendant
+// is missing or no longer matches an option, we fall back to the committed
+// selection returned by `getIndex()`.
+// It takes two parameters:
+// select     : the DOM node with the class `select` related to the native control
+// optionList : the list of options for the given custom control
+function getActiveIndex(select, optionList) {
+  if (select.getAttribute("aria-expanded") === "true") {
+    const activeId = select.getAttribute("aria-activedescendant");
+    const index = [...optionList].findIndex((option) => option.id === activeId);
+
+    if (index !== -1) {
+      return index;
+    }
+  }
+
+  return getIndex(select);
+}
+
 // ------------- //
 // Event binding //
 // ------------- //
@@ -314,7 +338,7 @@ selectList.forEach((select, selectIndex) => {
   });
 
   select.addEventListener("keydown", (event) => {
-    let index = getIndex(select);
+    let index = getActiveIndex(select, optionList);
 
     switch (event.key) {
       case "ArrowDown":
