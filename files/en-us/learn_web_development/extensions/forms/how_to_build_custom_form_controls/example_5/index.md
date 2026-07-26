@@ -340,6 +340,12 @@ selectList.forEach((select, selectIndex) => {
     switch (event.key) {
       case "ArrowDown":
         event.preventDefault();
+
+        if (select.getAttribute("aria-expanded") !== "true") {
+          toggleOptList(select);
+          break;
+        }
+
         if (index < optionList.length - 1) {
           index++;
           updateValue(select, index);
@@ -348,6 +354,12 @@ selectList.forEach((select, selectIndex) => {
 
       case "ArrowUp":
         event.preventDefault();
+
+        if (select.getAttribute("aria-expanded") !== "true") {
+          toggleOptList(select);
+          break;
+        }
+
         if (index > 0) {
           index--;
           updateValue(select, index);
@@ -356,11 +368,23 @@ selectList.forEach((select, selectIndex) => {
 
       case "Home":
         event.preventDefault();
+
+        if (select.getAttribute("aria-expanded") !== "true") {
+          toggleOptList(select);
+          break;
+        }
+
         updateValue(select, 0);
         break;
 
       case "End":
         event.preventDefault();
+
+        if (select.getAttribute("aria-expanded") !== "true") {
+          toggleOptList(select);
+          break;
+        }
+
         updateValue(select, optionList.length - 1);
         break;
 

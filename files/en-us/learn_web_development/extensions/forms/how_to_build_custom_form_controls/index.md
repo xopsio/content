@@ -1831,7 +1831,7 @@ To support keyboard accessibility, the control must be operable via keyboard. We
 - <kbd>Enter</kbd> / <kbd>Space</kbd> — toggle the option list open or closed
 - <kbd>Escape</kbd> — close the option list
 
-Each case calls `event.preventDefault()` to prevent the browser's default scrolling or form submission behavior. When the custom select is collapsed, Arrow Up, Arrow Down, Home, and End update the selected value without opening the listbox, matching the behavior of a native `<select>`. When the listbox is expanded, Arrow Up and Arrow Down start from the currently highlighted active option rather than from the committed selection, so keyboard navigation continues from where a previous keystroke or hover left off. The starting index is derived by a small helper, `getActiveIndex()`, which falls back to the committed selection returned by `getIndex()` while the listbox is collapsed or when the active descendant is missing or no longer matches an option:
+Each case calls `event.preventDefault()` to prevent the browser's default scrolling or form submission behavior. When the custom select is collapsed, Arrow Up, Arrow Down, Home, and End open the listbox without changing the selected value. Once the listbox is open, these keys move through its options. Arrow Up and Arrow Down start from the currently highlighted active option rather than from the committed selection, so keyboard navigation continues from where a previous keystroke or hover left off. The starting index is derived by a small helper, `getActiveIndex()`, which falls back to the committed selection returned by `getIndex()` while the listbox is collapsed or when the active descendant is missing or no longer matches an option:
 
 ```js
 function getActiveIndex(select, optionList) {
@@ -1857,6 +1857,12 @@ select.addEventListener("keydown", (event) => {
   switch (event.key) {
     case "ArrowDown":
       event.preventDefault();
+
+      if (select.getAttribute("aria-expanded") !== "true") {
+        toggleOptList(select);
+        break;
+      }
+
       if (index < optionList.length - 1) {
         index++;
         updateValue(select, index);
@@ -1865,6 +1871,12 @@ select.addEventListener("keydown", (event) => {
 
     case "ArrowUp":
       event.preventDefault();
+
+      if (select.getAttribute("aria-expanded") !== "true") {
+        toggleOptList(select);
+        break;
+      }
+
       if (index > 0) {
         index--;
         updateValue(select, index);
@@ -1873,11 +1885,23 @@ select.addEventListener("keydown", (event) => {
 
     case "Home":
       event.preventDefault();
+
+      if (select.getAttribute("aria-expanded") !== "true") {
+        toggleOptList(select);
+        break;
+      }
+
       updateValue(select, 0);
       break;
 
     case "End":
       event.preventDefault();
+
+      if (select.getAttribute("aria-expanded") !== "true") {
+        toggleOptList(select);
+        break;
+      }
+
       updateValue(select, optionList.length - 1);
       break;
 
@@ -2253,6 +2277,12 @@ selectList.forEach((select, selectIndex) => {
     switch (event.key) {
       case "ArrowDown":
         event.preventDefault();
+
+        if (select.getAttribute("aria-expanded") !== "true") {
+          toggleOptList(select);
+          break;
+        }
+
         if (index < optionList.length - 1) {
           index++;
           updateValue(select, index);
@@ -2261,6 +2291,12 @@ selectList.forEach((select, selectIndex) => {
 
       case "ArrowUp":
         event.preventDefault();
+
+        if (select.getAttribute("aria-expanded") !== "true") {
+          toggleOptList(select);
+          break;
+        }
+
         if (index > 0) {
           index--;
           updateValue(select, index);
@@ -2269,11 +2305,23 @@ selectList.forEach((select, selectIndex) => {
 
       case "Home":
         event.preventDefault();
+
+        if (select.getAttribute("aria-expanded") !== "true") {
+          toggleOptList(select);
+          break;
+        }
+
         updateValue(select, 0);
         break;
 
       case "End":
         event.preventDefault();
+
+        if (select.getAttribute("aria-expanded") !== "true") {
+          toggleOptList(select);
+          break;
+        }
+
         updateValue(select, optionList.length - 1);
         break;
 
