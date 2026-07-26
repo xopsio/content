@@ -42,15 +42,9 @@ This is the last example that explains [how to build custom form widgets](/en-US
 ### CSS
 
 ```css
-.widget select {
-  display: none;
-}
-
+.widget select,
 .no-widget .select {
-  position: absolute;
-  left: -5000em;
-  height: 0;
-  overflow: hidden;
+  display: none;
 }
 
 /* --------------- */

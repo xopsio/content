@@ -715,8 +715,9 @@ This CSS visually hides one of the elements, but it is still available to screen
 > This tutorial retains the earlier visual-hiding technique. Before
 > JavaScript runs, the native select is the intended fallback, but the
 > visually hidden custom control may also remain exposed to assistive
-> technologies. Production code should keep the inactive custom control out
-> of the accessibility tree until enhancement succeeds.
+> technologies. The final accessible example below keeps the inactive
+> control out of the accessibility tree in both the fallback and enhanced
+> states.
 
 Now we need a JavaScript switch to determine if the script is running or not. This switch is a couple of lines: if at page load time our script is running, it will remove the `no-widget` class and add the `widget` class, thereby swapping the visibility of the {{HTMLElement("select")}} element and the custom control.
 
@@ -1682,24 +1683,19 @@ To support these roles, we update our HTML like this:
 > `[role="option"]`, provided that you update the CSS and JavaScript
 > consistently.
 
-In the earlier stages, the inactive control is moved off-screen so that it
-remains available to assistive technologies. In the final accessible
-version, the two inactive states need different behavior. Before JavaScript
-runs, the custom control keeps the earlier off-screen fallback styling.
-After enhancement succeeds, the native select uses `display: none`, so that
-only the custom combobox is rendered, focusable, and exposed to assistive
-technologies:
+In the earlier stages, the inactive custom control is moved off-screen. At
+those stages, it has not yet acquired the final ARIA widget semantics, so
+exposing it does not create a second named form control. In this final
+accessible version, the custom control has combobox semantics and an
+accessible name. Leaving it in the accessibility tree before JavaScript
+runs would therefore expose both the native `<select>` and an inactive
+custom combobox. To avoid that duplication, the final example hides
+whichever control is inactive with `display: none`:
 
 ```css
-.widget select {
-  display: none;
-}
-
+.widget select,
 .no-widget .select {
-  position: absolute;
-  left: -5000em;
-  height: 0;
-  overflow: hidden;
+  display: none;
 }
 ```
 
@@ -1950,15 +1946,9 @@ Check out the [full source code here](/en-US/docs/Learn_web_development/Extensio
 ```
 
 ```css hidden
-.widget select {
-  display: none;
-}
-
+.widget select,
 .no-widget .select {
-  position: absolute;
-  left: -5000em;
-  height: 0;
-  overflow: hidden;
+  display: none;
 }
 
 .select {
