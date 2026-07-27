@@ -1824,10 +1824,10 @@ function deactivateOtherSelects(select, selectList) {
 
 To support keyboard accessibility, the control must be operable via keyboard. We listen for `keydown` events and use a `switch` statement to handle the following keys:
 
-- <kbd>ArrowDown</kbd> — move to the next option
-- <kbd>ArrowUp</kbd> — move to the previous option
-- <kbd>Home</kbd> — jump to the first option
-- <kbd>End</kbd> — jump to the last option
+- <kbd>ArrowDown</kbd> — open the listbox when collapsed; otherwise, move to the next option
+- <kbd>ArrowUp</kbd> — open the listbox when collapsed; otherwise, move to the previous option
+- <kbd>Home</kbd> — open the listbox when collapsed; otherwise, jump to the first option
+- <kbd>End</kbd> — open the listbox when collapsed; otherwise, jump to the last option
 - <kbd>Enter</kbd> / <kbd>Space</kbd> — toggle the option list open or closed
 - <kbd>Escape</kbd> — close the option list
 
