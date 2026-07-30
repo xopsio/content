@@ -1654,7 +1654,7 @@ To support these roles, we update our HTML like this:
 
 ```html
 <form class="no-widget">
-  <select name="myFruit" id="myFruit" aria-label="Fruit">
+  <select name="myFruit" aria-label="Fruit">
     <option>Cherry</option>
     <!-- ... -->
   </select>
@@ -1942,10 +1942,7 @@ optionList.forEach((option, index) => {
   });
 });
 
-select.addEventListener("click", (event) => {
-  if (event.target instanceof Element && event.target.closest(".option")) {
-    return;
-  }
+select.addEventListener("click", () => {
   toggleOptList(select);
 });
 ```
@@ -1962,7 +1959,7 @@ Check out the [full source code here](/en-US/docs/Learn_web_development/Extensio
 
 ```html hidden
 <form class="no-widget">
-  <select name="myFruit" id="myFruit" aria-label="Fruit">
+  <select name="myFruit" aria-label="Fruit">
     <option>Cherry</option>
     <option>Lemon</option>
     <option>Banana</option>
@@ -2256,10 +2253,7 @@ selectList.forEach((select, selectIndex) => {
     });
   });
 
-  select.addEventListener("click", (event) => {
-    if (event.target instanceof Element && event.target.closest(".option")) {
-      return;
-    }
+  select.addEventListener("click", () => {
     toggleOptList(select);
   });
 

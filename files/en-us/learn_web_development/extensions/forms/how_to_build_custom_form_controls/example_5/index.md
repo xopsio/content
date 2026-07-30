@@ -13,7 +13,7 @@ This is the last example that explains [how to build custom form widgets](/en-US
 
 ```html
 <form class="no-widget">
-  <select name="myFruit" id="myFruit" aria-label="Fruit">
+  <select name="myFruit" aria-label="Fruit">
     <option>Cherry</option>
     <option>Lemon</option>
     <option>Banana</option>
@@ -319,10 +319,7 @@ selectList.forEach((select, selectIndex) => {
     });
   });
 
-  select.addEventListener("click", (event) => {
-    if (event.target instanceof Element && event.target.closest(".option")) {
-      return;
-    }
+  select.addEventListener("click", () => {
     toggleOptList(select);
   });
 
