@@ -402,8 +402,10 @@ selectList.forEach((select, selectIndex) => {
   });
 });
 
-form.classList.remove("no-widget");
-form.classList.add("widget");
+if (selectList.length > 0) {
+  form.classList.remove("no-widget");
+  form.classList.add("widget");
+}
 ```
 
 ### Result
