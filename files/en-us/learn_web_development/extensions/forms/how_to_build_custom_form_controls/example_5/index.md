@@ -165,14 +165,61 @@ This is the last example that explains [how to build custom form widgets](/en-US
 // Function definitions //
 // -------------------- //
 
-function deactivateSelect(select) {
-  if (!select.classList.contains("active")) {
+function openOptList(select, activeIndex) {
+  const optionList = select.querySelectorAll(".option");
+
+  // Validate the requested active option BEFORE any popup state mutation.
+  // If the requested index is invalid, leave the popup closed so the
+  // POPUP_OPEN ⇒ valid active option invariant cannot be violated.
+  if (
+    !Number.isInteger(activeIndex) ||
+    activeIndex < 0 ||
+    activeIndex >= optionList.length ||
+    !optionList[activeIndex]
+  ) {
     return;
   }
 
-  const selectedOption = select.querySelectorAll(".option")[getIndex(select)];
-  if (selectedOption) {
-    highlightOption(select, selectedOption);
+  const optList = select.querySelector(".optList");
+
+  optList.classList.remove("hidden");
+  select.classList.add("active");
+  select.setAttribute("aria-expanded", "true");
+
+  highlightOption(select, optionList[activeIndex]);
+}
+
+function commitActiveOption(select) {
+  if (select.getAttribute("aria-expanded") !== "true") {
+    return;
+  }
+
+  const optionList = select.querySelectorAll(".option");
+  const activeId = select.getAttribute("aria-activedescendant");
+  const activeIndex = [...optionList].findIndex(
+    (option) => option.id === activeId,
+  );
+
+  if (activeIndex === -1) {
+    return;
+  }
+
+  updateValue(select, activeIndex);
+}
+
+function closeOptList(select) {
+  // aria-expanded is the single canonical source of truth for popup state.
+  // The .active and .hidden classes are presentation mirrors maintained by
+  // openOptList()/closeOptList() and are not consulted to authorize a state
+  // transition.
+  if (select.getAttribute("aria-expanded") !== "true") {
+    return;
+  }
+
+  const optionList = select.querySelectorAll(".option");
+  const committedOption = optionList[getIndex(select)];
+  if (committedOption) {
+    highlightOption(select, committedOption);
   }
 
   const optList = select.querySelector(".optList");
@@ -183,31 +230,21 @@ function deactivateSelect(select) {
   select.removeAttribute("aria-activedescendant");
 }
 
-function deactivateOtherSelects(select, selectList) {
-  selectList.forEach((other) => {
-    if (other !== select) {
-      deactivateSelect(other);
-    }
-  });
-}
-
-function toggleOptList(select) {
-  const optList = select.querySelector(".optList");
-  const willOpen = optList.classList.contains("hidden");
-
-  if (!willOpen) {
-    deactivateSelect(select);
+function cancelSelection(select) {
+  if (select.getAttribute("aria-expanded") !== "true") {
     return;
   }
 
-  optList.classList.remove("hidden");
-  select.classList.add("active");
-  select.setAttribute("aria-expanded", "true");
+  updateValue(select, getIndex(select));
+  closeOptList(select);
+}
 
-  const selected = select.querySelector('.option[aria-selected="true"]');
-  if (selected) {
-    select.setAttribute("aria-activedescendant", selected.id);
-  }
+function deactivateOtherSelects(select, selectList) {
+  selectList.forEach((other) => {
+    if (other !== select) {
+      closeOptList(other);
+    }
+  });
 }
 
 function highlightOption(select, option) {
@@ -313,14 +350,19 @@ selectList.forEach((select, selectIndex) => {
 
     option.addEventListener("click", (event) => {
       event.stopPropagation();
-      updateValue(select, index);
-      deactivateSelect(select);
+      highlightOption(select, optionList[index]);
+      commitActiveOption(select);
+      closeOptList(select);
       select.focus();
     });
   });
 
   select.addEventListener("click", () => {
-    toggleOptList(select);
+    if (select.getAttribute("aria-expanded") === "true") {
+      closeOptList(select);
+      return;
+    }
+    openOptList(select, getIndex(select));
   });
 
   select.addEventListener("focus", () => {
@@ -328,72 +370,91 @@ selectList.forEach((select, selectIndex) => {
   });
 
   select.addEventListener("blur", () => {
-    deactivateSelect(select);
+    if (select.getAttribute("aria-expanded") === "true") {
+      commitActiveOption(select);
+      closeOptList(select);
+    }
   });
 
   select.addEventListener("keydown", (event) => {
+    if (event.key === "Tab") {
+      if (select.getAttribute("aria-expanded") === "true") {
+        commitActiveOption(select);
+        closeOptList(select);
+      }
+      return;
+    }
+
     let index = getActiveIndex(select, optionList);
+    const expanded = select.getAttribute("aria-expanded") === "true";
 
     switch (event.key) {
       case "ArrowDown":
         event.preventDefault();
 
-        if (select.getAttribute("aria-expanded") !== "true") {
-          toggleOptList(select);
+        if (!expanded) {
+          openOptList(select, getIndex(select));
           break;
         }
 
         if (index < optionList.length - 1) {
           index++;
-          updateValue(select, index);
+          highlightOption(select, optionList[index]);
         }
         break;
 
       case "ArrowUp":
         event.preventDefault();
 
-        if (select.getAttribute("aria-expanded") !== "true") {
-          toggleOptList(select);
+        if (!expanded) {
+          openOptList(select, 0);
           break;
         }
 
         if (index > 0) {
           index--;
-          updateValue(select, index);
+          highlightOption(select, optionList[index]);
         }
         break;
 
       case "Home":
         event.preventDefault();
 
-        if (select.getAttribute("aria-expanded") !== "true") {
-          toggleOptList(select);
+        if (!expanded) {
+          openOptList(select, 0);
           break;
         }
 
-        updateValue(select, 0);
+        highlightOption(select, optionList[0]);
         break;
 
       case "End":
         event.preventDefault();
 
-        if (select.getAttribute("aria-expanded") !== "true") {
-          toggleOptList(select);
+        if (!expanded) {
+          openOptList(select, optionList.length - 1);
           break;
         }
 
-        updateValue(select, optionList.length - 1);
+        highlightOption(select, optionList[optionList.length - 1]);
         break;
 
       case "Enter":
       case " ":
         event.preventDefault();
-        toggleOptList(select);
+
+        if (!expanded) {
+          openOptList(select, getIndex(select));
+          break;
+        }
+
+        commitActiveOption(select);
+        closeOptList(select);
         break;
 
       case "Escape":
         event.preventDefault();
-        deactivateSelect(select);
+        cancelSelection(select);
         break;
       default:
         // Ignore all other keys
